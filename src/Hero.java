@@ -1,0 +1,134 @@
+import java.awt.*;
+import java.util.ArrayList;
+
+public class Hero { // делаем синглтон, чтобы не было возможности создания 2 персонажей
+    private static Hero instance;
+    private int x;
+    private int y;
+
+
+    private Hero(int x, int y){
+        this.x = x;
+        this.y = y;
+    }
+    public static Hero getInstance(){ // проверяем если уже объект персонажа, если нет создаем
+        if(instance == null) {
+            instance = new Hero(Maze.getStartX()+Maze.getCurrentLevel().getCellWidthHeight()/4,
+                    Maze.getStartY()+Maze.getCurrentLevel().getCellWidthHeight()/4);
+        }
+        return instance;
+    }
+    // перемещение вниз, вверх, вправо, влево соответственно
+    public void moveDown(){
+        int dy = Maze.getCurrentLevel().getCellWidthHeight()/3;
+        checkContactWithBorder(0,dy);
+        if(checkEnd()){
+            Maze.nextLevel();
+        }
+    }
+    public void moveUp(){
+        int dy = Maze.getCurrentLevel().getCellWidthHeight()/3;
+        checkContactWithBorder(0,-dy);
+        if(checkEnd()){
+            Maze.nextLevel();
+        }
+    }
+    public void moveRight(){
+        int dx = Maze.getCurrentLevel().getCellWidthHeight()/3;
+        checkContactWithBorder(dx,0);
+        if(checkEnd()){
+            Maze.nextLevel();
+        }
+    }
+    public void moveLeft(){
+        int dx = Maze.getCurrentLevel().getCellWidthHeight()/3;
+        checkContactWithBorder(-dx,0);
+        if(checkEnd()){
+            Maze.nextLevel();
+        }
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+
+
+    // вот тут я вообще ебал рот танцы с бубнами, тут мы задаем коллизию нашему персонажу и стенкам лабиринта
+    private void checkContactWithBorder(int dx,int dy){
+        if(dy == 0 && dx != 0){ // проверяем dx и dy в нашем случае либо dx либо dy не равен 0, от этого и пляшем проверяем что левый край не выходит за левый край лабиринта и правый за правый
+            if(x + dx > Maze.getStartX() && x + getWidth() + dx < Maze.getStartX()+(Maze.getCurrentLevel().getCellCount()) * Maze.getCurrentLevel().getCellWidthHeight()){
+                Cell curCell = findCell(Maze.getCells());
+                if(curCell!=null) { // тут мы проверяем если текущий х + dx проходит через существующую стенку найденной текущей клетки то мы присваиваем х значение стенки аналогично с у
+                    if(dx < 0) {
+                        if (curCell.hasLeftBorder() && x + dx < curCell.getX()) x = curCell.getX();
+                        else x+=dx;
+                    }
+                    else { // тут проверка правого края аналогично у
+                            if (curCell.hasRightBorder() && x + getWidth() + dx > curCell.getX()+getWidth()*2) x = curCell.getX()+getWidth();
+                            else x+=dx;
+                        }
+                }
+                else x+=dx;
+            }
+            else if(x + dx <= Maze.getStartX()){ // если x + dx выходит за левый край то присваиваем координату левого края
+                x = Maze.getStartX();
+            }
+            else if(x + getWidth() + dx >= Maze.getStartX()+(Maze.getCurrentLevel().getCellCount()) * Maze.getCurrentLevel().getCellWidthHeight()){ // тут проверка правого края
+                x = Maze.getStartX()+(Maze.getCurrentLevel().getCellCount()) * Maze.getCurrentLevel().getCellWidthHeight() - getWidth();
+            }
+        }
+        else if (dx == 0 && dy!=0){
+            if(y + dy > Maze.getStartY() && y + getWidth() + dy < Maze.getStartY()+(Maze.getCurrentLevel().getCellCount()) * Maze.getCurrentLevel().getCellWidthHeight()){
+                Cell curCell = findCell(Maze.getCells());
+                if(curCell!=null) {
+                    if(dy < 0) {
+                        if (curCell.hasUpperBorder() && y + dy < curCell.getY()) y = curCell.getY();
+                        else y+=dy;
+                    }
+                    else {
+                        if (curCell.hasBottomBorder() && y + getWidth() + dy > curCell.getY()+getWidth()*2) y = curCell.getY()+getWidth();
+                        else y+=dy;
+                    }
+                }
+                else y+=dy;
+            }
+            else if(y + dy <= Maze.getStartY()){
+                y = Maze.getStartY();
+            }
+            else if(y + getWidth() + dy >= Maze.getStartY()+(Maze.getCurrentLevel().getCellCount()) * Maze.getCurrentLevel().getCellWidthHeight()){
+                y = Maze.getStartY()+(Maze.getCurrentLevel().getCellCount()) * Maze.getCurrentLevel().getCellWidthHeight() - getWidth();
+            }
+        }
+
+    }
+    private Cell findCell(ArrayList<ArrayList<Cell>> cells){ // ищем текущую клетку в которой находится персонаж простым перебором
+        for(var arr: cells){
+            for(var cell : arr){
+                if(((x+getWidth()/2 >= cell.getX() && x+getWidth()/2 <= cell.getX() + Maze.getCurrentLevel().getCellWidthHeight())) &&
+                    ((y+getWidth()/2 >= cell.getY() && y+getWidth()/2 <= cell.getY() + Maze.getCurrentLevel().getCellWidthHeight()))) {
+                    return cell;
+                }
+            }
+        }
+        return null;
+    }
+
+    public boolean checkEnd() { // проверяем достиг ли персонаж конца
+        int finishX = Maze.getStartX() + (Maze.getCurrentLevel().getCellCount()-1) * Maze.getCurrentLevel().getCellWidthHeight();
+        int finishY = Maze.getStartY() + (Maze.getCurrentLevel().getCellCount()-1) * Maze.getCurrentLevel().getCellWidthHeight();
+        return ((x+getWidth()/2 >= finishX && x+getWidth()/2 <= finishX + Maze.getCurrentLevel().getCellWidthHeight())) &&
+                ((y+getWidth()/2 >= finishY && y+getWidth()/2 <= finishY + Maze.getCurrentLevel().getCellWidthHeight()));
+    }
+
+    public void draw(Graphics g){ // отрисовываем персонажа
+        g.setColor(Color.BLUE);
+        g.fillOval(x,y,Maze.getCurrentLevel().getCellWidthHeight()/2,Maze.getCurrentLevel().getCellWidthHeight()/2);
+    }
+    private int getWidth(){
+        return Maze.getCurrentLevel().getCellWidthHeight()/2;
+    }
+}
