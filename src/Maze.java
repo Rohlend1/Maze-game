@@ -34,6 +34,9 @@ public class Maze { // класс управляющий лабиринтом
     public static Level getCurrentLevel(){
         return currentLevel;
     }
+    public static void setLevelId(int levelId){
+        Maze.levelId = levelId;
+    }
 
     public static void setCurrentLevel(Level currentLevel) {
         Maze.currentLevel = currentLevel;

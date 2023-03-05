@@ -11,7 +11,7 @@ public class MainPanel extends JPanel { // главная панель
     private static final Hero hero = Hero.getInstance();
     private static JButton jButton;
     private static boolean flag = false;
-    private static final long time = System.currentTimeMillis();
+    private static long time = System.currentTimeMillis();
 
     private MainPanel(){ // генерируем панель
         setLayout(null);
@@ -37,6 +37,8 @@ public class MainPanel extends JPanel { // главная панель
     public static void restart(){ //перезапуск игры
         flag = false;
         Maze.setCurrentLevel(Level.LEVEL1);
+        time = System.currentTimeMillis();
+        Maze.setLevelId(0);
         frame.getContentPane().removeAll();
         frame.getContentPane().add(getNewMainPanel());
         frame.revalidate();
@@ -49,7 +51,7 @@ public class MainPanel extends JPanel { // главная панель
             super.paintComponent(g);
             AttributedString attributedString = new AttributedString("Уровень: " + Maze.getCurrentLevel().toString());
             attributedString.addAttribute(TextAttribute.FONT, new Font("Times New Roman", Font.BOLD, 16));
-            g.drawString(attributedString.getIterator(), WIDTH - 100, 35);                                        //посмотри здесь ширину и высоту чтоб по центру было
+            g.drawString(attributedString.getIterator(), WIDTH - 100, 35);
             Maze.draw(g);
             hero.draw(g);
             repaint();
@@ -65,7 +67,7 @@ public class MainPanel extends JPanel { // главная панель
         jButton.setVisible(true);
         AttributedString attributedString = new AttributedString(String.format("Время прохождения: %.2f c.",(System.currentTimeMillis()-time)*0.001f));
         attributedString.addAttribute(TextAttribute.FONT, new Font("Times New Roman", Font.BOLD, 16));
-        g.drawString(attributedString.getIterator(),WIDTH/2-80,HEIGHT/2-50);                                                                //потыкай вывод строки в конце ширину и длину чтоб она по центру была
+        g.drawString(attributedString.getIterator(),WIDTH/2-80,HEIGHT/2-50);
     }
 
 }

@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 
 public class MazeCreater {
-    public static void createMaze(ArrayList<ArrayList<Cell>> cells){ // генерация случайного лабиринта с помощью алгоритма Олдоса-Бродера почитай о нем отдельно
+    public static void createMaze(ArrayList<ArrayList<Cell>> cells){ // генерация случайного лабиринта с помощью алгоритма Олдоса-Бродера
         int i = (int)(Math.random()*cells.size());
         int j = (int)(Math.random()*cells.size());
         Cell currentCell = cells.get(i).get(j);
